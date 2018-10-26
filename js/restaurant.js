@@ -16,7 +16,7 @@ function restaurantList(i) {
                         '<img class="img-responsive" src="'+urlStreetView+'" />'+	            
                     '</div>'+
                     '<div class="clo-xs-8" id="infoRestaurant'+i+'">'+ // All information for the restaurant
-                        '<h4 class="list-group-item-heading">'+ restaurants[i].restaurantName +'</h4>'+
+                        '<h4 class="list-group-item-heading" id="nameRestaurant'+i+'">'+ restaurants[i].restaurantName +'</h4>'+
                         '<p class="list-group-item-text">'+
                             restaurants[i].address +'<br/>'+
                             '<strong><span id="averageComment'+i+'" style="color:orange; font-size:15px">'+
@@ -93,10 +93,10 @@ function addComments(restaurant, index) {
         }
         
 }
-function generateRestList() {
-    for (let i = 0; i < restaurants.length; i++) {
-        let restaurant = restaurants[i];
-        restaurantList(i);
-        addComments(restaurant, i);
-    }
-}
+// function generateRestList() {
+//     for (let i = 0; i < restaurants.length; i++) {
+//         let restaurant = restaurants[i];
+//         restaurantList(i);
+//         addComments(restaurant, i);
+//     }
+// }

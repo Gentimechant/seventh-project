@@ -1,8 +1,7 @@
 /*jshint esversion: 6 */
 
 let markers = [];
-let lat, long, nearbyS, map, infoWindow;
-
+let lat, long, nearbyS, map, infoWindow; 
 
 function initMap() { // TODO : add info window in wich marker 
     // Map option
@@ -38,10 +37,29 @@ function initMap() { // TODO : add info window in wich marker
         infoWindow.setContent('Vous êtes ici.');
         infoWindow.open(map);
         map.setCenter(pos);
-   		
-    		drawMarkerCurrentLocation(map, pos);	
-        service.nearbySearch(request, callback);
+
+         // googlePlace
+        const request = {
+          location: map.getCenter(),
+          radius: '500',
+          type: ['restaurant']
+        };
         
+        service = new google.maps.places.PlacesService(map);
+          
+        function callback(results, status) {
+          if (status == google.maps.places.PlacesServiceStatus.OK) {
+            for (let i = 0; i < results.length; i++) {
+              let place = results[i];
+              // console.log(' Nom est : ' + place.name + ' ,son étoile est : ' + place.rating + ' il se trouve à : ' + place.vicinity);
+              console.log(place);
+              drawMarker(map, place.geometry.location.lat(), place.geometry.location.lng(), place.name);
+            }
+          }
+        }
+   		
+        drawMarkerCurrentLocation(map, pos);
+        service.nearbySearch(request, callback);
         
     	}, function() {
     		handleLocationError(true, infoWindow, map.getCenter());
@@ -60,70 +78,9 @@ function initMap() { // TODO : add info window in wich marker
     }
 
 
-    // Test googlePlace
-    const request = {
-      location: map.getCenter(),
-      radius: '500',
-      type: ['restaurant']
-    };
-  
-    service = new google.maps.places.PlacesService(map);
-    
-  
-  
-  function callback(results, status) {
-    if (status == google.maps.places.PlacesServiceStatus.OK) {
-      for (let i = 0; i < results.length; i++) {
-        let place = results[i];
-        // console.log(' Nom est : ' + place.name + ' ,son étoile est : ' + place.rating + ' il se trouve à : ' + place.vicinity);
-        // console.log(place);
-        drawMarker(map, place.geometry.location.lat(), place.geometry.location.lng(), place.name);
-      }
-    }
-  }
+   
   // console.log(place.name);
- 
-//load the JSON file and display markers on map maching thr location
-  function displayRestaurant() {
-   for (let index = 0; index < restaurants.length; index++) {
-     const element = restaurants[index].restaurantName;
-     drawMarker(map, restaurants[index].lat, restaurants[index].long, element);
-    }
-  }
 
-
-// Function to draw marker 
-  function drawMarker(map, latitude,longitude, element){
-    const iconRest = 'img/restaurant_icon.png';
-    let iMarker = markers.length;
-    markers[iMarker] = new google.maps.Marker({
-      position: {lat:parseFloat(latitude),lng:parseFloat(longitude)},
-      map: map,
-      draggable: true,
-      icon: iconRest
-    });
-    let infoWindow = new google.maps.InfoWindow({
-      content: '<h4>' + element + '</h4>'
-    });
-
-    markers[iMarker].addListener('click', function(){
-      infoWindow.open(map, markers[iMarker]);
-    });
-  }
-
-  // custom icon for current location
-  function drawMarkerCurrentLocation(map, position){
-    const img = 'http://www.robotwoods.com/dev/misc/bluecircle.png';
-    let marker = new google.maps.Marker({
-      position: position,
-      icon: img,
-      draggable: true,
-      map: map
-    });
-    marker.setAnimation(google.maps.Animation.BOUNCE);
-  }
-
-  let lat, long;
   // Listen for click on map
     google.maps.event.addListener(map, 'click', function(event){
         const coords = event.latLng;
@@ -203,3 +160,44 @@ displayRestaurant();
 }
 
 
+//load the JSON file and display markers on map maching thr location
+function displayRestaurant() {
+  for (let index = 0; index < restaurants.length; index++) {
+     let restaurant = restaurants[index]; 
+     const element = restaurants[index].restaurantName;
+     restaurantList(index);
+     addComments(restaurant, index);
+     drawMarker(map, restaurant.lat, restaurant.long, element);
+   }
+ }
+
+ // Function to draw marker 
+ function drawMarker(map, latitude,longitude, element){
+  const iconRest = 'img/restaurant_icon.png';
+  let iMarker = markers.length;
+  markers[iMarker] = new google.maps.Marker({
+    position: {lat:parseFloat(latitude),lng:parseFloat(longitude)},
+    map: map,
+    draggable: true,
+    icon: iconRest
+  });
+  let infoWindow = new google.maps.InfoWindow({
+    content: '<h4>' + element + '</h4>'
+  });
+
+  markers[iMarker].addListener('click', function(){
+    infoWindow.open(map, markers[iMarker]);
+  });
+}
+
+// custom icon for current location
+function drawMarkerCurrentLocation(map, position){
+  const img = 'http://www.robotwoods.com/dev/misc/bluecircle.png';
+  let marker = new google.maps.Marker({
+    position: position,
+    icon: img,
+    draggable: true,
+    map: map
+  });
+  marker.setAnimation(google.maps.Animation.BOUNCE);
+}

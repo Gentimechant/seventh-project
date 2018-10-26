@@ -21,16 +21,16 @@ const streetView = {
 	size : "300x150"	
 };
 
-let json = null;
-$.ajax({
-    type: "GET",
-    dataType: "jsonp",
-    url: 'https://maps.googleapis.com/maps/api/place/details/json?place_id=ChIJGRC76ImkrhIRTIDv0CQrvng&fields=name,rating,reviews&key=AIzaSyAwz_WOrMURY-oJO9R5QMH_TUDw9dtb7ss',
-    success: function (result) {
-        json = result;
-        console.log(json);
-    }
-  });
+// let json = null;
+// $.ajax({
+//     type: "GET",
+//     dataType: "jsonp",
+//     url: 'https://maps.googleapis.com/maps/api/place/details/json?place_id=ChIJGRC76ImkrhIRTIDv0CQrvng&fields=name,rating,reviews&key=AIzaSyAwz_WOrMURY-oJO9R5QMH_TUDw9dtb7ss',
+//     success: function (result) {
+//         json = result;
+//         console.log(json);
+//     }
+//   });
 
 // const url = 'https://jsonplaceholder.typicode.com/posts';
 // $.getJSON(url,
@@ -47,3 +47,4 @@ $.ajax({
 // Http.onreadystatechange=(e)=>{
 // console.log(Http.responseText);
 // };
+

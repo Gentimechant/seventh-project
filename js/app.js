@@ -1,7 +1,7 @@
 /*jshint esversion: 6 */
 
 $(function() {
-    generateRestList();
+    // generateRestList();
     initMap();
     
     //Default filter 
@@ -38,13 +38,20 @@ $(function() {
     // Event click to show comments
     $('#restaurantList').on('click', '.btnComment', function (e) { 
         const id = $(this).attr('id').replace('btnComment','');
-        $('#collapse'+id).toggle("slow");  
+        $('#collapse'+id).toggle("slow");
+        
+    });
 
+    $('#restaurantList').on('click', 'h4', function (e) {
+        const id = $(this).attr('id').replace('nameRestaurant','');
+        const name = $(this).text();
+        infoWindow.open(map, markers[id]);
+        infoWindow.setContent(name);
     });
 
     /* 1. Visualizing things on Hover  */
     $('.rating-stars ul li').on('mouseover', function(){
-        let onStar = parseInt($(this).data('value'), 10); // The star currently mouse on
+        let onStar = parseInt($(this).data('value'), 10); // The star currently mouse on 
     
         // Now highlight all the stars that's not after the current hovered star
         $(this).parent().children('li.star').each(function(e){
@@ -123,10 +130,5 @@ $(function() {
             }
         }
     });
-
-    // https://maps.googleapis.com/maps/api/place/details/json?placeid=ChIJGRC76ImkrhIRTIDv0CQrvng&fields=name,rating,formatted_phone_number&key=AIzaSyAwz_WOrMURY-oJO9R5QMH_TUDw9dtb7ss
-    
-
-
 
 });
