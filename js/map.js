@@ -1,13 +1,13 @@
 /*jshint esversion: 6 */
 
 let markers = [];
-let lat, long, nearbyS, map, infoWindow; 
+let lat, long, map, infoWindow; 
 
-function initMap() { // TODO : add info window in wich marker 
+function initMap() { 
     // Map option
     let options = {
         zoom: 14,
-        center: {lat: 43.6582047, lng: 1.43194289}, // default position 
+        center: {lat: 43.59991108712436, lng: 1.4504528045654297}, // default position 
         zoomControlOptions: {
           style: google.maps.ZoomControlStyle.SMALL
         },
@@ -15,16 +15,11 @@ function initMap() { // TODO : add info window in wich marker
           style: google.maps.ZoomControlStyle.SMALL
         }
     };
-
-    /**
-     * lat = parseFloat(position.coords.latitude);
-          long = parseFloat(position.coords.longitude);
-     */
-
+    
     // New map
     map = new google.maps.Map(document.getElementById("map"), options);
+    service = new google.maps.places.PlacesService(map);
     infoWindow = new google.maps.InfoWindow();
-
     // Set current position as center of map
     // https://developers.google.com/maps/documentation/javascript/examples/map-geolocation
     if (navigator.geolocation) {
@@ -38,34 +33,86 @@ function initMap() { // TODO : add info window in wich marker
         infoWindow.open(map);
         map.setCenter(pos);
 
-         // googlePlace
-        const request = {
-          location: map.getCenter(),
-          radius: '500',
-          type: ['restaurant']
-        };
-        
-        service = new google.maps.places.PlacesService(map);
-          
-        function callback(results, status) {
-          if (status == google.maps.places.PlacesServiceStatus.OK) {
-            for (let i = 0; i < results.length; i++) {
-              let place = results[i];
-              // console.log(' Nom est : ' + place.name + ' ,son étoile est : ' + place.rating + ' il se trouve à : ' + place.vicinity);
-              console.log(place);
-              drawMarker(map, place.geometry.location.lat(), place.geometry.location.lng(), place.name);
+        drawMarkerCurrentLocation(map, pos);
+        $('#restaurantList').empty();
+        // Functions for Nearbysearch
+          // googlePlace
+          const request = {
+            location: map.getCenter(),
+            radius: '1000',
+            type: ['restaurant']
+          };
+
+          function callback(results, status) {
+            if (status == google.maps.places.PlacesServiceStatus.OK) {
+              for (let i = 0; i < results.length; i++) {
+                let place = results[i];
+                let place_id = place.place_id;
+                const length = restaurants.length;
+                  // add new restaurant by place's results
+                  restaurants[length] = {
+                    "restaurantName": place.name,
+                    "address": place.vicinity,
+                    "lat": place.geometry.location.lat(),
+                    "long": place.geometry.location.lng(),
+                    "ratings":[]
+                  };
+                // console.log(place);
+                drawMarker(map, place.geometry.location.lat(), place.geometry.location.lng(), place.name);
+                restaurantList(restaurants, length);
+                service.getDetails(addPlaceRequest(place_id), placeCallback(restaurants[length], length));
+              }
             }
           }
-        }
-   		
-        drawMarkerCurrentLocation(map, pos);
-        service.nearbySearch(request, callback);
+
+          // Functions for Google details
+            function addPlaceRequest(placeId) { 
+              let request = {
+                placeId: placeId,
+                fields: ['name', 'rating', 'reviews']
+              };
+              return request;
+            }
+
+            function placeCallback(restaurant, index) { //restaurant[i]
+              const ratings = restaurant.ratings;
+              function callback(place, status) {
+                if (status == google.maps.places.PlacesServiceStatus.OK) {
+                  let placeRev = place.reviews;
+                  // let rating = restaurant.ratings;
+                  if (placeRev === undefined) {
+                      console.log(0);
+                      // $('#nbComment'+index).text('Aucun Avis');   
+                  } else {
+                    for (let index = 0; index < placeRev.length; index++) {
+                      let reviews = placeRev[index];
+                      let rat = { "stars": reviews.rating, "comment": reviews.text };
+                      ratings.push(rat);
+                      
+                      
+                    }
+                  }
+                  
+                  
+                  // console.log(place);
+                  console.log('Fin de la première');
+                  console.log(ratings);
+                  
+                  
+                  // placeDetails = place;
+                  addComments(restaurant, index); 
+                }
+              }
+              return callback;
+            }
+        
+            service.nearbySearch(request, callback);
         
     	}, function() {
     		handleLocationError(true, infoWindow, map.getCenter());
     	});
     } else {
-      // Browser doesn't support Geolocation
+      // Browser doesn't support Geolocation id_place: ChIJk_Dyve2krhIRUkSPLIddWhc
       handleLocationError(false, infoWindow, map.getCenter());
     }
     
@@ -142,7 +189,7 @@ function initMap() { // TODO : add info window in wich marker
                "ratings":[]
              };
              console.log(restaurants);
-             restaurantList(length);
+             restaurantList(restaurants, length);
              drawMarker(map, lat, long, restaurants[length].restaurantName);
              $('#averageComment'+length).text(0);
              $('#nbComment'+length).text("0 avis");
@@ -157,6 +204,8 @@ function initMap() { // TODO : add info window in wich marker
     });
     
 displayRestaurant();
+
+
 }
 
 
@@ -165,7 +214,7 @@ function displayRestaurant() {
   for (let index = 0; index < restaurants.length; index++) {
      let restaurant = restaurants[index]; 
      const element = restaurants[index].restaurantName;
-     restaurantList(index);
+     restaurantList(restaurants, index);
      addComments(restaurant, index);
      drawMarker(map, restaurant.lat, restaurant.long, element);
    }
@@ -201,3 +250,5 @@ function drawMarkerCurrentLocation(map, position){
   });
   marker.setAnimation(google.maps.Animation.BOUNCE);
 }
+
+

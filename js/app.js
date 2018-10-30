@@ -23,26 +23,26 @@ $(function() {
     }
 
     // add min filter event
-    $('#minFilter').on('change', function(){
+    $(document).on('change', '#minFilter', function(){
         let minFilter = parseInt($(this).val());
         let maxFilter = parseInt($('#maxFilter').val());
         filterStars(minFilter, maxFilter);
     });
     // add max filter event
-    $('#maxFilter').on('change', function(){
+    $(document).on('change', '#maxFilter', function(){
         let minFilter = parseInt($('#minFilter').val());
         let maxFilter = parseInt($(this).val());
         filterStars(minFilter, maxFilter);
     });
 
     // Event click to show comments
-    $('#restaurantList').on('click', '.btnComment', function (e) { 
+    $(document).on('click', '#restaurantList .btnComment', function (e) { 
         const id = $(this).attr('id').replace('btnComment','');
         $('#collapse'+id).toggle("slow");
         
     });
 
-    $('#restaurantList').on('click', 'h4', function (e) {
+    $(document).on('click', '#restaurantList h4', function (e) {
         const id = $(this).attr('id').replace('nameRestaurant','');
         const name = $(this).text();
         infoWindow.open(map, markers[id]);
@@ -50,7 +50,7 @@ $(function() {
     });
 
     /* 1. Visualizing things on Hover  */
-    $('.rating-stars ul li').on('mouseover', function(){
+    $(document).on('mouseover', ".rating-stars ul li", function(){
         let onStar = parseInt($(this).data('value'), 10); // The star currently mouse on 
     
         // Now highlight all the stars that's not after the current hovered star
@@ -63,7 +63,7 @@ $(function() {
         }
         });
         
-    }).on('mouseout', function(){
+    }).on('mouseout', ".rating-stars ul li", function(){
         $(this).parent().children('li.star').each(function(e){
         $(this).removeClass('hover');
         });
@@ -72,7 +72,7 @@ $(function() {
     let ratStar;
     
     /* 2. Action to perform on click */
-    $('.rating-stars ul li').on('click', function(){
+    $(document).on('click', ".rating-stars ul li", function(){
         let onStar = parseInt($(this).data('value'), 10); // The star currently selected
         let stars = $(this).parent().children('li.star');
         for (i = 0; i < stars.length; i++) {
@@ -86,7 +86,7 @@ $(function() {
     });
 
     // add comments and ratings
-    $('#restaurantList').on('click', '.submitNewComment', function(){
+    $(document).on('click', '#restaurantList .submitNewComment', function(){
         const id = $(this).attr('id').replace('submitNewComment','');
         let onStar = $('#stars'+id).children('li.star');
         const indexRating = restaurants[id].ratings.length;

@@ -1,9 +1,9 @@
 [
     {
         "restaurantName":"Royal Buffet",
-        "address":"312 Avenue des Etats Unis, 31200 Toulouse",
-        "lat":43.600000,
-        "long":1.433333,
+        "address":"6 Rue de Bayard, 31000 Toulouse",
+        "lat":43.6082689,
+        "long":1.4470559000000094,
         "ratings":[
            {
               "stars":3,
@@ -21,9 +21,9 @@
      },
      {
         "restaurantName":"La Table D'Emilie",
-        "address":"374 bis Avenue de Fronton, 31200 Toulouse",
-        "lat":43.6582047,
-        "long":1.4319428999999673,
+        "address":"6ter Impasse Baour-Lormian, 31000 Toulouse",
+        "lat":43.6029551145554,
+        "long":1.444191079724419,
         "ratings":[
            {
               "stars":5,
@@ -37,9 +37,9 @@
      },
      {
         "restaurantName":"Tutti Pizza",
-        "address":"450 Avenue de Fronton, 31140 Aucamville",
-        "lat":43.6655255,
-        "long":1.4303698999999597,
+        "address":"1 Rue des Jacobins, 31000 Toulouse",
+        "lat":43.60402413847167,
+        "long":1.4408007675295949,
         "ratings":[
            {
               "stars":5,
@@ -53,9 +53,9 @@
      },
      {
         "restaurantName":"Pizzeria Di Roma",
-        "address":"22 bis route de Fronton, 31140 Aucamville",
-        "lat":43.6691972,
-        "long":1.4288034999999581,
+        "address":"15 Rue des Paradoux, 31000 Toulouse",
+        "lat":43.59850478644028,
+        "long":1.442817788708794,
         "ratings":[
            {
               "stars":4,
@@ -73,9 +73,9 @@
      },
      {
         "restaurantName":"ARTIGIANO Pizza",
-        "address":"462 Avenue de Fronton, 31140 Aucamville",
-        "lat":43.6663534,
-        "long":1.43006790000004,
+        "address":"18 Rue Pierre de Fermat, 31000 Toulouse",
+        "lat":43.59951173279286,
+        "long":1.449383836377251,
         "ratings":[
            {
               "stars":5,
@@ -97,9 +97,9 @@
      },
      {
         "restaurantName":"McDonald's",
-        "address":"410 Avenue de Fronton, 31200 Toulouse",
-        "lat":43.6614617,
-        "long":1.4318041999999878,
+        "address":"11 Rue John Fitzgerald Kennedy, 31000 Toulouse",
+        "lat":43.60592595940931,
+        "long":1.445392709363091,
         "ratings":[
            {
               "stars":3,
