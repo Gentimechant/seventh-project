@@ -48,3 +48,50 @@ const streetView = {
 // console.log(Http.responseText);
 // };
 
+/* 
+     function placeCallback(restaurant, index) { //restaurant[i]
+              function callback(place, status) {
+                if (status == google.maps.places.PlacesServiceStatus.OK) {
+                  let reviews = place.reviews;
+                  let rating = restaurant.ratings;
+                  if (reviews === undefined) {
+                      console.log(0);
+                      $('#nbComment'+index).text('Aucun Avis');   
+                  } else {
+                    for (let index = 0; index < reviews.length; index++) {
+                      // let reviews = place[index].reviews;
+                      // ratings.push(reviews);
+                      // console.log(ratings[index]);
+                      
+                    }
+                  }
+                  
+                  // let rat = { "stars": place.rating, "comment": place.text };
+                  console.log(place);
+                  // console.log(place.reviews);
+                  
+                  
+                  // placeDetails = place;
+                  // addComments(placeDetails, i); 
+                }
+              }
+              return callback;
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*/
