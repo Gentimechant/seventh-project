@@ -1,5 +1,31 @@
 /*jshint esversion: 6 */
 
+// load Json into a variable
+    let restaurants = (function () {
+        let json = null;
+        $.ajax({
+            'async': false,
+            'global': false,
+            'url': "json/restaurant.json",
+            'dataType': "json",
+            'success': function (data) {
+                json = data;
+            }
+        });
+        return json;
+    })();
+
+    const streetView = {
+        key : "AIzaSyAwz_WOrMURY-oJO9R5QMH_TUDw9dtb7ss",
+        size : "300x150"	
+    };
+
+/**
+ * Function to Add all restaurants to the left side
+ * @param  {Object} restaurant
+ * @param  {number} index
+ */
+
 function restaurantList(restaurants, i) { 
     
          // Each street view 
@@ -67,7 +93,13 @@ function restaurantList(restaurants, i) {
     
 }
 
-// Add comment
+
+// 
+/**
+ * Function to Add comment in the restaurant list
+ * @param  {Object} restaurant
+ * @param  {number} index
+ */
 
 function addComments(restaurant, index) {
         let collapsComment = $('#collapse'+index);
@@ -98,10 +130,6 @@ function addComments(restaurant, index) {
             } else {
                 averageComment.text(averageStars);
             }
-        }
-        
-        
-        
-        
+        }     
 }
 

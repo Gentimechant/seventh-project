@@ -1,13 +1,17 @@
 /*jshint esversion: 6 */
 
 $(function() {
-    // generateRestList();
+    
     initMap();
     
-    //Default filter 
+    //Default filter at the begining (or after refresh)
     $("#minFilter, #maxFilter").prop("selectedIndex", 0);
     
     // filter function 
+    /**
+     * @param  {number} minFilter
+     * @param  {number} maxFilter
+     */
     function filterStars(minFilter, maxFilter){
         for (let i = 0; i < restaurants.length; i++) {
             let averageStars = parseFloat($('#averageComment'+ i).text());
@@ -22,12 +26,16 @@ $(function() {
         }
     }
 
+    /**
+     * Note: $(document) must be declared otherwise the new restaurants will not have Event Listener
+     */
     // add min filter event
     $(document).on('change', '#minFilter', function(){
         let minFilter = parseInt($(this).val());
         let maxFilter = parseInt($('#maxFilter').val());
         filterStars(minFilter, maxFilter);
     });
+
     // add max filter event
     $(document).on('change', '#maxFilter', function(){
         let minFilter = parseInt($('#minFilter').val());

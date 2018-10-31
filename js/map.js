@@ -20,8 +20,13 @@ function initMap() {
     map = new google.maps.Map(document.getElementById("map"), options);
     service = new google.maps.places.PlacesService(map);
     infoWindow = new google.maps.InfoWindow();
-    // Set current position as center of map
-    // https://developers.google.com/maps/documentation/javascript/examples/map-geolocation
+
+   
+    /**
+     * Set current position as center of map
+     * @see  https://developers.google.com/maps/documentation/javascript/examples/map-geolocation
+     */
+    
     if (navigator.geolocation) {
     	navigator.geolocation.getCurrentPosition(function(position) {
     		const pos = {
@@ -34,6 +39,7 @@ function initMap() {
         map.setCenter(pos);
 
         drawMarkerCurrentLocation(map, pos);
+
         $('#restaurantList').empty();
         // Functions for Nearbysearch
           // googlePlace
@@ -49,6 +55,7 @@ function initMap() {
                 let place = results[i];
                 let place_id = place.place_id;
                 const length = restaurants.length;
+
                   // add new restaurant by place's results
                   restaurants[length] = {
                     "restaurantName": place.name,
@@ -57,7 +64,7 @@ function initMap() {
                     "long": place.geometry.location.lng(),
                     "ratings":[]
                   };
-                // console.log(place);
+               
                 drawMarker(map, place.geometry.location.lat(), place.geometry.location.lng(), place.name);
                 restaurantList(restaurants, length);
                 service.getDetails(addPlaceRequest(place_id), placeCallback(restaurants[length], length));
@@ -65,7 +72,7 @@ function initMap() {
             }
           }
 
-          // Functions for Google details
+            // Functions for Google details
             function addPlaceRequest(placeId) { 
               let request = {
                 placeId: placeId,
@@ -74,30 +81,23 @@ function initMap() {
               return request;
             }
 
-            function placeCallback(restaurant, index) { //restaurant[i]
+            function placeCallback(restaurant, index) {
               const ratings = restaurant.ratings;
               function callback(place, status) {
                 if (status == google.maps.places.PlacesServiceStatus.OK) {
                   let placeRev = place.reviews;
                   // let rating = restaurant.ratings;
                   if (placeRev === undefined) {
-                      console.log(0);
-                      // $('#nbComment'+index).text('Aucun Avis');   
-                  } else {
-                    for (let index = 0; index < placeRev.length; index++) {
-                      let reviews = placeRev[index];
-                      let rat = { "stars": reviews.rating, "comment": reviews.text };
-                      ratings.push(rat);
-                      
-                      
-                    }
+                    console.log(0);
+                    $('#nbComment'+index).text('Aucun Avis');   
+                } else {
+                  for (let index = 0; index < placeRev.length; index++) {
+                    let reviews = placeRev[index];
+                    let rat = { "stars": reviews.rating, "comment": reviews.text };
+                    ratings.push(rat);
+
                   }
-                  
-                  
-                  // console.log(place);
-                  console.log('Fin de la première');
-                  console.log(ratings);
-                  
+                }
                   
                   // placeDetails = place;
                   addComments(restaurant, index); 
@@ -105,8 +105,9 @@ function initMap() {
               }
               return callback;
             }
-        
-            service.nearbySearch(request, callback);
+          
+          // Nearby search 
+          service.nearbySearch(request, callback);
         
     	}, function() {
     		handleLocationError(true, infoWindow, map.getCenter());
@@ -125,10 +126,11 @@ function initMap() {
     }
 
 
-   
-  // console.log(place.name);
+  
+    /**
+     * Event Listener for google map
+     */
 
-  // Listen for click on map
     google.maps.event.addListener(map, 'click', function(event){
         const coords = event.latLng;
         lat = parseFloat(event.latLng.lat()); // parseFloat : decimal transformation
@@ -143,8 +145,10 @@ function initMap() {
         // Insert on popup window
         $('#street-view').attr('src', urlStreetView);
 
-        // modal link : https://www.w3schools.com/howto/howto_css_modals.asp
-        // Get the modal
+        /**
+         * Get the modal
+         * @see  https://www.w3schools.com/howto/howto_css_modals.asp
+         */
         var modal = document.getElementById('myModal');
 
         // Get the <span> element that closes the modal
@@ -188,7 +192,7 @@ function initMap() {
                "long":long,
                "ratings":[]
              };
-             console.log(restaurants);
+             // Display and draw marker restaurant
              restaurantList(restaurants, length);
              drawMarker(map, lat, long, restaurants[length].restaurantName);
              $('#averageComment'+length).text(0);
@@ -204,8 +208,6 @@ function initMap() {
     });
     
 displayRestaurant();
-
-
 }
 
 
@@ -221,23 +223,29 @@ function displayRestaurant() {
  }
 
  // Function to draw marker 
+ /**
+  * @param  {object} map
+  * @param  {number} latitude
+  * @param  {number} longitude
+  * @param  {string} infoWindow_Name
+  */
  function drawMarker(map, latitude,longitude, element){
-  const iconRest = 'img/restaurant_icon.png';
-  let iMarker = markers.length;
-  markers[iMarker] = new google.maps.Marker({
-    position: {lat:parseFloat(latitude),lng:parseFloat(longitude)},
-    map: map,
-    draggable: true,
-    icon: iconRest
-  });
-  let infoWindow = new google.maps.InfoWindow({
-    content: '<h4>' + element + '</h4>'
-  });
+    const iconRest = 'img/restaurant_icon.png';
+    let iMarker = markers.length;
+    markers[iMarker] = new google.maps.Marker({
+      position: {lat:parseFloat(latitude),lng:parseFloat(longitude)},
+      map: map,
+      draggable: true,
+      icon: iconRest
+    });
+    let infoWindow = new google.maps.InfoWindow({
+      content: '<h4>' + element + '</h4>'
+    });
 
-  markers[iMarker].addListener('click', function(){
-    infoWindow.open(map, markers[iMarker]);
-  });
-}
+    markers[iMarker].addListener('click', function(){
+      infoWindow.open(map, markers[iMarker]);
+    });
+  }
 
 // custom icon for current location
 function drawMarkerCurrentLocation(map, position){
