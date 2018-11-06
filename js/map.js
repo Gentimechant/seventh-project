@@ -6,7 +6,7 @@ let lat, long, map, infoWindow;
 function initMap() { 
     // Map option
     let options = {
-        zoom: 14,
+        zoom: 15,
         center: {lat: 43.59991108712436, lng: 1.4504528045654297}, // default position 
         zoomControlOptions: {
           style: google.maps.ZoomControlStyle.SMALL
@@ -88,7 +88,6 @@ function initMap() {
                   let placeRev = place.reviews;
                   // let rating = restaurant.ratings;
                   if (placeRev === undefined) {
-                    console.log(0);
                     $('#nbComment'+index).text('Aucun Avis');   
                 } else {
                   for (let index = 0; index < placeRev.length; index++) {
@@ -99,7 +98,7 @@ function initMap() {
                   }
                 }
                   
-                  // placeDetails = place;
+                  // Add comment's API
                   addComments(restaurant, index); 
                 }
               }
