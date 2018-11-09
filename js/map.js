@@ -1,7 +1,7 @@
 /*jshint esversion: 6 */
 
 let markers = [];
-let lat, long, map, infoWindow; 
+let map, lat, long, geocoder, infoWindow; 
 
 function initMap() { 
     // Map option
@@ -20,6 +20,7 @@ function initMap() {
     map = new google.maps.Map(document.getElementById("map"), options);
     service = new google.maps.places.PlacesService(map);
     infoWindow = new google.maps.InfoWindow();
+    geocoder = new google.maps.Geocoder();
 
    
     /**
@@ -38,75 +39,26 @@ function initMap() {
         infoWindow.open(map);
         map.setCenter(pos);
 
-        drawMarkerCurrentLocation(map, pos);
-
-        $('#restaurantList').empty();
-        // Functions for Nearbysearch
-          // googlePlace
-          const request = {
-            location: map.getCenter(),
-            radius: '1000',
-            type: ['restaurant']
-          };
-
-          function callback(results, status) {
-            if (status == google.maps.places.PlacesServiceStatus.OK) {
-              for (let i = 0; i < results.length; i++) {
-                let place = results[i];
-                let place_id = place.place_id;
-                const length = restaurants.length;
-
-                  // add new restaurant by place's results
-                  restaurants[length] = {
-                    "restaurantName": place.name,
-                    "address": place.vicinity,
-                    "lat": place.geometry.location.lat(),
-                    "long": place.geometry.location.lng(),
-                    "ratings":[]
-                  };
-               
-                drawMarker(map, place.geometry.location.lat(), place.geometry.location.lng(), place.name);
-                restaurantList(restaurants, length);
-                service.getDetails(addPlaceRequest(place_id), placeCallback(restaurants[length], length));
-              }
-            }
-          }
-
-            // Functions for Google details
-            function addPlaceRequest(placeId) { 
-              let request = {
-                placeId: placeId,
-                fields: ['name', 'rating', 'reviews']
-              };
-              return request;
-            }
-
-            function placeCallback(restaurant, index) {
-              const ratings = restaurant.ratings;
-              function callback(place, status) {
-                if (status == google.maps.places.PlacesServiceStatus.OK) {
-                  let placeRev = place.reviews;
-                  // let rating = restaurant.ratings;
-                  if (placeRev === undefined) {
-                    $('#nbComment'+index).text('Aucun Avis');   
-                } else {
-                  for (let index = 0; index < placeRev.length; index++) {
-                    let reviews = placeRev[index];
-                    let rat = { "stars": reviews.rating, "comment": reviews.text };
-                    ratings.push(rat);
-
-                  }
-                }
-                  
-                  // Add comment's API
-                  addComments(restaurant, index); 
-                }
-              }
-              return callback;
-            }
+        // drawMarkerCurrentLocation(map, pos);
+        const img = 'http://www.robotwoods.com/dev/misc/bluecircle.png';
+        let marker = new google.maps.Marker({
+          position: pos,
+          icon: img,
+          draggable: true,
+          map: map
+        });
+        marker.setAnimation(google.maps.Animation.BOUNCE);
+        
+        for (let index = 0; index < markers.length; index++) {
+          const marker = markers[index];
+          $('#restaurant' + index).hide();
+          marker.setVisible(false);
           
-          // Nearby search 
-          service.nearbySearch(request, callback);
+        }
+
+        // Functions for Nearbysearch
+        const centerMap = map.getCenter();
+        addNearby(centerMap);
         
     	}, function() {
     		handleLocationError(true, infoWindow, map.getCenter());
@@ -123,103 +75,8 @@ function initMap() {
                               'Error: The Geolocation service failed.' :
                               'Error: Your browser doesn\'t support geolocation.');
     }
-
-
-  
-    /**
-     * Event Listener for google map
-     */
-
-    google.maps.event.addListener(map, 'click', function(event){
-        const coords = event.latLng;
-        lat = parseFloat(event.latLng.lat()); // parseFloat : decimal transformation
-        long = parseFloat(event.latLng.lng());
-        
-        
-        //Add google street view
-        const urlStreetView = 'https://maps.googleapis.com/maps/api/streetview?'+
-            'size=' + streetView.size +
-            '&location=' + lat + ',' + long +
-            '&key=' + streetView.key;
-        // Insert on popup window
-        $('#street-view').attr('src', urlStreetView);
-
-        /**
-         * Get the modal
-         * @see  https://www.w3schools.com/howto/howto_css_modals.asp
-         */
-        var modal = document.getElementById('myModal');
-
-        // Get the <span> element that closes the modal
-        var span = document.getElementsByClassName("close")[0];
-
-        // When the user clicks on the button, open the modal
-        modal.style.display = "block";
-
-        // When the user clicks on <span> (x), close the modal
-        span.onclick = function() {
-            modal.style.display = "none";
-        };
-
-        // When the user clicks anywhere outside of the modal, close it
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.style.display = "none";
-            }
-        }; 
-        let adress;
-        // Insert adress to popup window
-        const geocoder = new google.maps.Geocoder();
-        geocoder.geocode({ 'latLng': coords }, function(results, status) {
-          if (status == google.maps.GeocoderStatus.OK) {
-            if (results[0]) {
-                   adress = results[0].formatted_address;
-                  $("#adressLocation").text(adress);
-              }
-          }
-        });
-
-        $('#myModal').on('click', '.submitNewRestaurant', function(){
-          let newRestaurant = $('#addRestaurant').val();
-          const length = restaurants.length;
-           if (newRestaurant != '') {
-             // add new restaurant 
-             restaurants[length] = {
-               "restaurantName":newRestaurant,
-               "address": adress,
-               "lat":lat,
-               "long":long,
-               "ratings":[]
-             };
-             // Display and draw marker restaurant
-             restaurantList(restaurants, length);
-             drawMarker(map, lat, long, restaurants[length].restaurantName);
-             $('#averageComment'+length).text(0);
-             $('#nbComment'+length).text("0 avis");
-             modal.style.display = "none";
-           } else {
-             $('#emptyName').removeClass().addClass('alert alert-danger')
-               .text('Veuillez entrer le nom de votre restaurant')
-               .show(500).delay(3000).hide(500);
-           }
-           
-         });
-    });
-    
-displayRestaurant();
 }
 
-
-//load the JSON file and display markers on map maching thr location
-function displayRestaurant() {
-  for (let index = 0; index < restaurants.length; index++) {
-     let restaurant = restaurants[index]; 
-     const element = restaurants[index].restaurantName;
-     restaurantList(restaurants, index);
-     addComments(restaurant, index);
-     drawMarker(map, restaurant.lat, restaurant.long, element);
-   }
- }
 
  // Function to draw marker 
  /**
@@ -247,15 +104,93 @@ function displayRestaurant() {
   }
 
 // custom icon for current location
-function drawMarkerCurrentLocation(map, position){
-  const img = 'http://www.robotwoods.com/dev/misc/bluecircle.png';
-  let marker = new google.maps.Marker({
-    position: position,
-    icon: img,
-    draggable: true,
-    map: map
-  });
-  marker.setAnimation(google.maps.Animation.BOUNCE);
+// function drawMarkerCurrentLocation(map, position){
+//   const img = 'http://www.robotwoods.com/dev/misc/bluecircle.png';
+//   let marker = new google.maps.Marker({
+//     position: position,
+//     icon: img,
+//     draggable: true,
+//     map: map
+//   });
+//   marker.setAnimation(google.maps.Animation.BOUNCE);
+// }
+
+function addNearby(position) {
+  // googlePlace
+  const request = {
+   location: position,
+   radius: '800',
+   type: ['restaurant']
+ };
+
+ function callback(results, status) {
+   if (status == google.maps.places.PlacesServiceStatus.OK) {
+    for (let i = 0; i < results.length; i++) {
+      const place = results[i];
+      // const position = place.geometry.location;
+      const place_id = {placeId: place.place_id};
+      const length = restaurants.length;
+
+         // add new restaurant by place's results
+         restaurants[length] = {
+           "restaurantName": place.name,
+           "address": place.vicinity,
+           "lat": place.geometry.location.lat(),
+           "long": place.geometry.location.lng(),
+           "ratings":[]
+         };
+
+      const restaurant = restaurants[length];
+      const ratings = restaurant.ratings;
+
+      // Drawing new marker and add restaurant
+      drawMarker(map, place.geometry.location.lat(), place.geometry.location.lng(), place.name);
+      restaurantList(restaurants, length, restaurant.lat, restaurant.long);
+       
+       
+      const averageComment = $('#averageComment'+length);
+      const nbComment = $('#nbComment'+length);
+
+       if (place.rating === undefined) {
+        averageComment.text(0);
+        nbComment.text('0 avis');
+          
+       } else{
+        averageComment.text(place.rating);
+        service.getDetails(place_id, function (results, status) {
+          if (status == google.maps.places.PlacesServiceStatus.OK) {
+            let placeRev = results.reviews;
+            nbComment.text(placeRev.length + ' avis');
+           
+           for (let index = 0; index < placeRev.length; index++) {
+             let reviews = placeRev[index];
+             let rat = { "stars": reviews.rating, "comment": reviews.text };
+             ratings.push(rat);
+            
+           }
+            // Add comment's API
+            addNearbyComments(restaurant, length); 
+          }
+        });
+      }
+
+    let average = averageComment.text();
+    let minFilter = parseInt($('#minFilter').val());
+    let maxFilter = parseInt($('#maxFilter').val());
+
+      if (average >= minFilter && average <= maxFilter) {
+        $('#restaurant'+ length).show();
+      } else {
+        $('#restaurant'+ length).hide();
+        markers[length].setVisible(false);
+      }
+      
+     } //  each results
+   }
+ }
+ // Nearby search 
+ service.nearbySearch(request, callback);
+
 }
 
-
+         

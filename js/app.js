@@ -2,7 +2,8 @@
 
 $(function() {
     
-    initMap();
+    // initMap();
+    displayRestaurant();
     
     //Default filter at the begining (or after refresh)
     $("#minFilter, #maxFilter").prop("selectedIndex", 0);
@@ -137,6 +138,111 @@ $(function() {
                 $(onStar[i]).removeClass('selected');
             }
         }
+    });
+
+     /**
+     * Event Listener for google map
+     */
+
+    map.addListener('click', function(event){
+        const coords = event.latLng;
+        lat = parseFloat(event.latLng.lat()); // parseFloat : decimal transformation
+        long = parseFloat(event.latLng.lng());
+        
+        
+        //Add google street view
+        const urlStreetView = 'https://maps.googleapis.com/maps/api/streetview?'+
+            'size=300x150' + 
+            '&key=' + streetView.key +
+            '&location=' + lat + ',' + long;
+        // Insert on popup window
+        $('#street-view').attr('src', urlStreetView);
+
+        /**
+         * Get the modal
+         * @see  https://www.w3schools.com/howto/howto_css_modals.asp
+         */
+        var modal = document.getElementById('myModal');
+
+        // Get the <span> element that closes the modal
+        var span = document.getElementsByClassName("close")[0];
+
+        // When the user clicks on the button, open the modal
+        modal.style.display = "block";
+
+        // When the user clicks on <span> (x), close the modal
+        span.onclick = function() {
+            modal.style.display = "none";
+        };
+
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }; 
+        let adress;
+        // Insert adress to popup window
+        geocoder.geocode({ 'latLng': coords }, function(results, status) {
+          if (status == google.maps.GeocoderStatus.OK) {
+            if (results[0]) {
+                adress = results[0].formatted_address;
+                $("#adressLocation").text(adress);
+              } else {
+                window.alert('No results found');
+              }
+          } else { 
+              window.alert('Geocoder failed due to: ' + status);
+            }
+        });
+
+        $('#myModal').on('click', '.submitNewRestaurant', function(){
+          let newRestaurant = $('#addRestaurant').val();
+          const length = restaurants.length;
+           if (newRestaurant != '') {
+             // add new restaurant 
+             restaurants[length] = {
+               "restaurantName":newRestaurant,
+               "address": adress,
+               "lat":lat,
+               "long":long,
+               "ratings":[]
+             };
+             let restaurant = restaurants[length];
+             // Display and draw marker restaurant
+             restaurantList(restaurants, length, restaurant.lat, restaurant.long);
+             drawMarker(map, lat, long, restaurants[length].restaurantName);
+             $('#averageComment'+length).text(0);
+             $('#nbComment'+length).text("0 avis");
+             modal.style.display = "none";
+           } else {
+             $('#emptyName').removeClass().addClass('alert alert-danger')
+               .text('Veuillez entrer le nom de votre restaurant')
+               .show(500).delay(3000).hide(500);
+           }
+           
+         });
+    });
+
+    // When we drag 
+    map.addListener('dragend', function(){
+        position = map.getCenter();
+        addNearby(position);
+    });
+
+    // Map limits
+    map.addListener('bounds_changed', function(){ 
+        for (let index = 0; index < markers.length; index++) {
+            const mark = markers[index];
+            if(map.getBounds().contains(mark.getPosition()) && mark.getVisible()){ 
+                mark.getVisible(true);
+                $('#restaurant' + index).removeClass('hide');
+            } else { 
+                mark.getVisible(false);
+                $('#restaurant' + index).addClass('hide');
+            }
+        }
+          
     });
 
 });

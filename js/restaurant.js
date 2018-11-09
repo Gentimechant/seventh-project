@@ -15,8 +15,19 @@
         return json;
     })();
 
+    // let restaurants = (function () {
+    //     let json = null;
+    //     $.getJSON("json/restaurant.json",
+    //         function (data) {
+    //         json = data; 
+    //         }
+    //     );
+    //     return json;
+    // })();
+    
+    
     const streetView = {
-        key : "AIzaSyAwz_WOrMURY-oJO9R5QMH_TUDw9dtb7ss",
+        key : "AIzaSyB48K7MnLGjHOLRg8YlZVgGg2kIj2zNrXU",
         size : "300x150"	
     };
 
@@ -26,13 +37,11 @@
  * @param  {number} index
  */
 
-function restaurantList(restaurants, i) { 
+function restaurantList(restaurants, i, lat, long) { 
     
          // Each street view 
-         const urlStreetView = 'https://maps.googleapis.com/maps/api/streetview?'+
-         'size=' + streetView.size +
-         '&location=' + restaurants[i].lat + ',' + restaurants[i].long +
-         '&key=' + streetView.key;
+         const urlStreetView = 'https://maps.googleapis.com/maps/api/streetview?size=300x150&key=' + streetView.key +
+            '&location=' + lat + ',' + long;
      
      // Add restaurant list
      $('#restaurantList').append( 
@@ -46,9 +55,9 @@ function restaurantList(restaurants, i) {
                      '<p class="list-group-item-text">'+
                          restaurants[i].address +'<br/>'+
                          '<strong><span id="averageComment'+i+'" style="color:orange; font-size:15px">'+
-                             'TEXTE MOYENNE AVIS' +
+                             '0' +
                          '</span></strong> - ' +
-                         '<span id="nbComment'+i+'"> avis</span>'+					
+                         '<span id="nbComment'+i+'"> 0 avis</span>'+					
                      '</p>'+
                  '</div>'+
                  '<div class="col-xs-12" style="padding-top:10px;">'+
@@ -132,4 +141,307 @@ function addComments(restaurant, index) {
             }
         }     
 }
+//load the JSON file and display markers on map maching thr location
+function displayRestaurant() {
+    for (let index = 0; index < restaurants.length; index++) {
+       let restaurant = restaurants[index]; 
+       const element = restaurants[index].restaurantName;
+       restaurantList(restaurants, index, restaurant.lat, restaurant.long);
+       addComments(restaurant, index);
+       drawMarker(map, restaurant.lat, restaurant.long, element);
+    }
+}
 
+function addNearbyComments(restaurant, index) {
+    let collapsComment = $('#collapse'+index);
+    let rest = restaurant.ratings;  
+    for (let i = 0; i < rest.length; i++) {
+        collapsComment.append(
+            '<span style="color:orange; font-size:14px">' + rest[i].stars + '/5 '+'</span>'+
+            '<span style="font-size:12px">\"'+ rest[i].comment+'\"</span><br/><br/>'
+        ).hide();
+    }
+}
+/*
+   // googlePlace
+          const request = {
+            location: map.getCenter(),
+            radius: '1000',
+            type: ['restaurant']
+          };
+
+          function callback(results, status) {
+            if (status == google.maps.places.PlacesServiceStatus.OK) {
+              for (let i = 0; i < results.length; i++) {
+                let place = results[i];
+                let place_id = place.place_id;
+                const length = restaurants.length;
+
+                  // add new restaurant by place's results
+                  restaurants[length] = {
+                    "restaurantName": place.name,
+                    "address": place.vicinity,
+                    "lat": place.geometry.location.lat(),
+                    "long": place.geometry.location.lng(),
+                    "ratings":[]
+                  };
+               
+                drawMarker(map, place.geometry.location.lat(), place.geometry.location.lng(), place.name);
+                restaurantList(restaurants, length);
+                service.getDetails(addPlaceRequest(place_id), placeCallback(restaurants[length], length));
+              }
+            }
+          }
+
+            // Functions for Google details
+            function addPlaceRequest(placeId) { 
+              let request = {
+                placeId: placeId,
+                fields: ['name', 'rating', 'reviews']
+              };
+              return request;
+            }
+
+            function placeCallback(restaurant, index) {
+              const ratings = restaurant.ratings;
+              function callback(place, status) {
+                if (status == google.maps.places.PlacesServiceStatus.OK) {
+                  let placeRev = place.reviews;
+                  // let rating = restaurant.ratings;
+                  if (placeRev === undefined) {
+                    $('#nbComment'+index).text('Aucun Avis');   
+                } else {
+                  for (let index = 0; index < placeRev.length; index++) {
+                    let reviews = placeRev[index];
+                    let rat = { "stars": reviews.rating, "comment": reviews.text };
+                    ratings.push(rat);
+
+                  }
+                }
+                  
+                  // Add comment's API
+                  addComments(restaurant, index); 
+                }
+              }
+              return callback;
+            }
+          
+          // Nearby search 
+          service.nearbySearch(request, callback);
+
+*/
+
+/* 
+function addNearby(position) {
+     // googlePlace
+     const request = {
+      location: position,
+      radius: '1000',
+      type: ['restaurant']
+    };
+
+    function callback(results, status) {
+      if (status == google.maps.places.PlacesServiceStatus.OK) {
+        $.each(results, function(){
+          const place_id = {placeId: this.place_id};
+          const length = restaurants.length;
+
+            // add new restaurant by place's results
+            restaurants[length] = {
+              "restaurantName": place.name,
+              "address": place.vicinity,
+              "lat": place.geometry.location.lat(),
+              "long": place.geometry.location.lng(),
+              "ratings":[]
+            };
+            let restaurant = restaurants[length];
+            const ratings = restaurant.ratings;
+          
+          drawMarker(map, place.geometry.location.lat(), place.geometry.location.lng(), place.name);
+          restaurantList(restaurants, length);
+          service.getDetails(place_id, function (results, status) {
+            if (status == google.maps.places.PlacesServiceStatus.OK) {
+              let placeRev = place.reviews;
+              // let rating = restaurant.ratings;
+              if (placeRev === undefined) {
+                $('#nbComment'+index).text('Aucun Avis');   
+            } else {
+              for (let index = 0; index < placeRev.length; index++) {
+                let reviews = placeRev[index];
+                let rat = { "stars": reviews.rating, "comment": reviews.text };
+                ratings.push(rat);
+  
+              }
+            }
+              
+              // Add comment's API
+              addComments(restaurant, index); 
+            }
+          });
+
+        });
+      }
+    }
+    // Nearby search 
+    service.nearbySearch(request, callback);
+}
+
+
+ /**
+     * Event Listener for google map
+     */
+
+/*
+
+    google.maps.event.addListener(map, 'click', function(event){
+        const coords = event.latLng;
+        lat = parseFloat(event.latLng.lat()); // parseFloat : decimal transformation
+        long = parseFloat(event.latLng.lng());
+        
+        
+        //Add google street view
+        const urlStreetView = 'https://maps.googleapis.com/maps/api/streetview?'+
+            'size=300x150' + 
+            '&key=' + streetView.key +
+            '&location=' + lat + ',' + long;
+        // Insert on popup window
+        $('#street-view').attr('src', urlStreetView);
+
+        /**
+         * Get the modal
+         * @see  https://www.w3schools.com/howto/howto_css_modals.asp
+       
+        var modal = document.getElementById('myModal');
+
+        // Get the <span> element that closes the modal
+        var span = document.getElementsByClassName("close")[0];
+
+        // When the user clicks on the button, open the modal
+        modal.style.display = "block";
+
+        // When the user clicks on <span> (x), close the modal
+        span.onclick = function() {
+            modal.style.display = "none";
+        };
+
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }; 
+        let adress;
+        // Insert adress to popup window
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ 'latLng': coords }, function(results, status) {
+          if (status == google.maps.GeocoderStatus.OK) {
+            if (results[0]) {
+                   adress = results[0].formatted_address;
+                  $("#adressLocation").text(adress);
+              } else {
+                window.alert('No results found');
+              }
+          } else {
+            window.alert('Geocoder failed due to: ' + status);
+            }
+        });
+
+        $('#myModal').on('click', '.submitNewRestaurant', function(){
+          let newRestaurant = $('#addRestaurant').val();
+          const length = restaurants.length;
+           if (newRestaurant != '') {
+             // add new restaurant 
+             restaurants[length] = {
+               "restaurantName":newRestaurant,
+               "address": adress,
+               "lat":lat,
+               "long":long,
+               "ratings":[]
+             };
+             // Display and draw marker restaurant
+             restaurantList(restaurants, length);
+             drawMarker(map, lat, long, restaurants[length].restaurantName);
+             $('#averageComment'+length).text(0);
+             $('#nbComment'+length).text("0 avis");
+             modal.style.display = "none";
+           } else {
+             $('#emptyName').removeClass().addClass('alert alert-danger')
+               .text('Veuillez entrer le nom de votre restaurant')
+               .show(500).delay(3000).hide(500);
+           }
+           
+         });
+    });
+
+
+    function addNearby(position) {
+  // googlePlace
+  const request = {
+   location: position,
+   radius: '800',
+   type: ['restaurant']
+ };
+
+ function callback(results, status) {
+   if (status == google.maps.places.PlacesServiceStatus.OK) {
+    for (let i = 0; i < results.length; i++) {
+      let place = results[i];
+      // console.log(place); 
+      //  console.log(place.rating);
+       
+       const place_id = {placeId: place.place_id};
+       const length = restaurants.length;
+
+         // add new restaurant by place's results
+         restaurants[length] = {
+           "restaurantName": place.name,
+           "address": place.vicinity,
+           "lat": place.geometry.location.lat(),
+           "long": place.geometry.location.lng(),
+           "ratings":[]
+         };
+        let restaurant = restaurants[length];
+        const ratings = restaurant.ratings;
+        let averageComment = $('#averageComment'+length);
+        let nbComment = $('#nbComment'+length);
+       
+       drawMarker(map, place.geometry.location.lat(), place.geometry.location.lng(), place.name);
+       restaurantList(restaurants, length);
+       if (place.rating != undefined) {
+          averageComment.text(place.rating);
+          service.getDetails(place_id, function (results, status) {
+            if (status == google.maps.places.PlacesServiceStatus.OK) {
+              let placeRev = results.reviews;
+              nbComment.text(placeRev.length + ' avis');
+             console.log(results);
+             console.log(status);
+             
+             for (let index = 0; index < placeRev.length; index++) {
+               let reviews = placeRev[index];
+              //  if (reviews.reviews === undefined) {
+              //   $('#nbComment'+length).text('Aucun Avis');   
+              //   } else {
+                  let rat = { "stars": reviews.rating, "comment": reviews.text };
+                  ratings.push(rat);
+                // }
+             }
+              
+              
+              // Add comment's API
+              addNearbyComments(restaurant, length); 
+            }
+          });
+       } 
+      //  else{
+      //   averageComment.text(0);
+      //   nbComment.text('0 avis');
+      //  }
+       
+
+     } // fin each results
+   }
+ }
+ // Nearby search 
+ service.nearbySearch(request, callback);
+}
+*/
