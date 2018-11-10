@@ -103,18 +103,6 @@ function initMap() {
     });
   }
 
-// custom icon for current location
-// function drawMarkerCurrentLocation(map, position){
-//   const img = 'http://www.robotwoods.com/dev/misc/bluecircle.png';
-//   let marker = new google.maps.Marker({
-//     position: position,
-//     icon: img,
-//     draggable: true,
-//     map: map
-//   });
-//   marker.setAnimation(google.maps.Animation.BOUNCE);
-// }
-
 function addNearby(position) {
   // googlePlace
   const request = {
@@ -127,9 +115,25 @@ function addNearby(position) {
    if (status == google.maps.places.PlacesServiceStatus.OK) {
     for (let i = 0; i < results.length; i++) {
       const place = results[i];
-      // const position = place.geometry.location;
-      const place_id = {placeId: place.place_id};
-      const length = restaurants.length;
+      // console.log(place);
+      const position = place.geometry.location;
+      let isItExist = false;
+
+      // check each marker if it exists in the map
+      for (let index = 0; index < markers.length; index++) {
+        const element = markers[index];
+        if(element.getPosition().equals(position)){
+          isItExist = true;
+        }
+        // console.log(isItExist);
+        // return isItExist; console.log('Same position warning');
+        
+      }
+
+      // if marker doesn't exist, we create it
+      if (isItExist === false) {
+        const place_id = {placeId: place.place_id};
+        const length = restaurants.length;
 
          // add new restaurant by place's results
          restaurants[length] = {
@@ -140,50 +144,59 @@ function addNearby(position) {
            "ratings":[]
          };
 
-      const restaurant = restaurants[length];
-      const ratings = restaurant.ratings;
+          const restaurant = restaurants[length];
+          const ratings = restaurant.ratings;
 
-      // Drawing new marker and add restaurant
-      drawMarker(map, place.geometry.location.lat(), place.geometry.location.lng(), place.name);
-      restaurantList(restaurants, length, restaurant.lat, restaurant.long);
-       
-       
-      const averageComment = $('#averageComment'+length);
-      const nbComment = $('#nbComment'+length);
 
-       if (place.rating === undefined) {
-        averageComment.text(0);
-        nbComment.text('0 avis');
+
+          // Drawing new marker and add restaurant
+          drawMarker(map, place.geometry.location.lat(), place.geometry.location.lng(), place.name);
+          restaurantList(restaurants, length, restaurant.lat, restaurant.long);
           
-       } else{
-        averageComment.text(place.rating);
-        service.getDetails(place_id, function (results, status) {
-          if (status == google.maps.places.PlacesServiceStatus.OK) {
-            let placeRev = results.reviews;
-            nbComment.text(placeRev.length + ' avis');
-           
-           for (let index = 0; index < placeRev.length; index++) {
-             let reviews = placeRev[index];
-             let rat = { "stars": reviews.rating, "comment": reviews.text };
-             ratings.push(rat);
-            
-           }
-            // Add comment's API
-            addNearbyComments(restaurant, length); 
+          
+          const averageComment = $('#averageComment'+length);
+          const nbComment = $('#nbComment'+length);
+
+          if (place.rating === undefined) {
+            averageComment.text(0);
+            nbComment.text('0 avis');
+              
+          } else{
+            averageComment.text(place.rating);
+            service.getDetails(place_id, function (results, status) {
+              if (status == google.maps.places.PlacesServiceStatus.OK) {
+                let placeRev = results.reviews;
+                nbComment.text(placeRev.length + ' avis');
+              
+              for (let index = 0; index < placeRev.length; index++) {
+                let reviews = placeRev[index];
+                let rat = { "stars": reviews.rating, "comment": reviews.text };
+                ratings.push(rat);
+                
+              }
+                // Add comment's API
+                addNearbyComments(restaurant, length); 
+              }
+            });
           }
-        });
+
+        let average = averageComment.text();
+        let minFilter = parseInt($('#minFilter').val());
+        let maxFilter = parseInt($('#maxFilter').val());
+
+          if (average >= minFilter && average <= maxFilter) {
+            $('#restaurant'+ length).show();
+          } else {
+            $('#restaurant'+ length).hide();
+            markers[length].setVisible(false);
+          }
+        
+      } else{
+        console.log('duplicates restaurants');
+        
       }
 
-    let average = averageComment.text();
-    let minFilter = parseInt($('#minFilter').val());
-    let maxFilter = parseInt($('#maxFilter').val());
-
-      if (average >= minFilter && average <= maxFilter) {
-        $('#restaurant'+ length).show();
-      } else {
-        $('#restaurant'+ length).hide();
-        markers[length].setVisible(false);
-      }
+      
       
      } //  each results
    }
